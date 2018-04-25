@@ -25,21 +25,35 @@ class JDSpoder(scrapy.Spider):
         self.url_num = 0
         self.data = BugsItem()
         self.gid = '0'
+        self.data['goods_effect'] = None
+        self.data['goods_local'] = None
     def parse(self, response):
         self.gid = response.url.split('/')[-1].strip('.html')
         selected = []
         self.data['key'] = 'd'
         self.data['goods_id'] = str(self.gid)
         self.data['shop_name'] = response.xpath('//*[@id="crumb-wrap"]/div/div[2]/div/div[1]/div/a/text()').extract_first()
-        # try:
-        #     mid1 = response.xpath('/html/body/div[5]/div/div[2]/div[1]/text()').extract()
-        #     mid2 = mid1[1].replace(" ", '')
-        #     mid3 = mid2.replace("\n", '')
-        #     self.data['goods_name'] = mid3
-        # except Exception as e:
-        #     self.data['goods_name'] = response.xpath('//*[@id="crumb-wrap"]/div/div[1]/div[9]/text()').extract_first()
+        self.data['goods_brands'] = response.xpath('//*[@id="parameter-brand"]/li/a/text()').extract_first()
         self.data['goods_name'] = response.xpath('//*[@id="crumb-wrap"]/div/div[1]/div[9]/text()').extract_first()
-        # self.data['goods_name'] = response.xpath('//*[@id="detail"]/div[2]/div[2]/div[1]/div/dl/dd[3]/text()').extract_first()
+        try:
+            for i in range(1, 10):
+                a = response.xpath(
+                    '//*[@id="detail"]/div[2]/div[1]/div[1]/ul[2]/li[' + str(i) + ']/text()').extract_first()
+                # print(a)
+                if '功效' in a :
+                    e = a.split('：')
+                    self.data['goods_effect'] = e[1]
+                    continue
+                if '产地' in a:
+                    e = a.split('：')
+                    self.data['goods_local'] = e[1]
+                    continue
+                if a == None:
+                    break
+        except Exception as e:
+            # print("京东国际版")
+            pass
+
 
         try:
             selected = response.xpath('//*[@id="choose-attr-1"]/div[2]/div/@class').extract()
@@ -81,9 +95,13 @@ class JDSpoder(scrapy.Spider):
         item['PoorRate'] = self.data['PoorRate']
         item['DefaultGoodCount'] = self.data['DefaultGoodCount']
         item['price'] =  self.data['price']
+        item['goods_brands'] = self.data['goods_brands']
+        item['goods_effect'] = self.data['goods_effect']
+        item['goods_local'] = self.data['goods_local']
         item['data_time'] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000+0800")
         yield item
         url = 'http://club.jd.com/review/{}-1-1-0.html'.format(self.gid)
+        # time.sleep(5)
         # yield Request(url,callback=self.comment,dont_filter=True)
 
     def comment(self, response):

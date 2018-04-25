@@ -5,7 +5,7 @@ from scrapy.utils.project import get_project_settings
 import json
 # 加入项目配置文件
 configure_logging({'LOG_FORMAT': '%(levelname)s: %(message)s'})
-reactor.suggestThreadPoolSize(30)
+reactor.suggestThreadPoolSize(10)
 runner = CrawlerRunner(get_project_settings())
 # 导入爬虫
 from bugs.spiders.jd_spider import JDSpoder

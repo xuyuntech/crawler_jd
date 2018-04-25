@@ -32,5 +32,8 @@ class BugsItem(scrapy.Item):
     general_content = scrapy.Field()
     poor_content = scrapy.Field()
     data_time = scrapy.Field()
+    goods_brands = scrapy.Field()
+    goods_effect = scrapy.Field()
+    goods_local = scrapy.Field()
 
 
